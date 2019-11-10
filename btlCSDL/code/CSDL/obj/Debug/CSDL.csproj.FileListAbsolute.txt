@@ -1,0 +1,10 @@
+C:\Users\Administrator\source\repos\CSDL\bin\Debug\CSDL.exe.config
+C:\Users\Administrator\source\repos\CSDL\bin\Debug\CSDL.exe
+C:\Users\Administrator\source\repos\CSDL\bin\Debug\CSDL.pdb
+C:\Users\Administrator\source\repos\CSDL\obj\Debug\CSDL.csprojAssemblyReference.cache
+C:\Users\Administrator\source\repos\CSDL\obj\Debug\CSDL.Form1.resources
+C:\Users\Administrator\source\repos\CSDL\obj\Debug\CSDL.Properties.Resources.resources
+C:\Users\Administrator\source\repos\CSDL\obj\Debug\CSDL.csproj.GenerateResource.cache
+C:\Users\Administrator\source\repos\CSDL\obj\Debug\CSDL.csproj.CoreCompileInputs.cache
+C:\Users\Administrator\source\repos\CSDL\obj\Debug\CSDL.exe
+C:\Users\Administrator\source\repos\CSDL\obj\Debug\CSDL.pdb

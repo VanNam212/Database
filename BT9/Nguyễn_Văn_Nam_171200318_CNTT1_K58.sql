@@ -84,13 +84,16 @@ print N'Tổng: '+cast(@tong1 as char)
 alter procedure proc3 @mnv nvarchar(50), @nam int, @tonghd int output, @tongtien float output
 as
 begin
-	select @tonghd=count(HOADON.MaHD), @tongtien=Sum(SL*GiaBan)
-	from HOADON, CT_HOADON
-	where MaNV=@mnv and year(NgayLap)=@nam and HOADON.MaHD=CT_HOADON.MaHD
+	select @tonghd=count(HOADON.MaHD)
+	from HOADON
+	where MaNV=@mnv and year(NgayLap)=@nam
+	select @tongtien=sum(SL*GiaBan)
+	from CT_HOADON,HOADON
+	where CT_HOADON.MaHD=HOADON.MaHD and MaNV=@mnv and year(NgayLap)=@nam
 end
 
 declare @tongtien1 float, @tonghd1 int
-exec proc3 N'0004',2015, @tonghd1 output, @tongtien1 output
+exec proc3 N'0001',2015, @tonghd1 output, @tongtien1 output
 print N'Tổng hd: '+cast(@tonghd1 as char)+N' Tổng tiền: '+cast(@tongtien1 as char)
 
 --4.

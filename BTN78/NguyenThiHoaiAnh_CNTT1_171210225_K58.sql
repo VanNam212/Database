@@ -1,10 +1,35 @@
-use BT7
+﻿use BT7
+create procedure pro5 @thang int, @nam int, @dt float output
+as
+begin
+select @dt=SUM(GiaBan*SoLuong)
+from [tbl Chi Tiet Hoa Don], [tbl Hoa Don]
+where [tbl Chi Tiet Hoa Don].MaHD=[tbl Hoa Don].MaHD and MONTH(NgayLapHD)=@thang and YEAR(NgayLapHD)=@nam
+end
+
+declare @dt1 float
+exec pro5 1,1997, @dt1 output
+print N'Doanh thu: '+cast(@dt1 as char)
 --1.
 alter table [tbl San Pham]
 add constraint PK_MaSP primary key(MaSP)
 
 --2.
-
+create proc pro2 @mahd nvarchar(5), @makh nvarchar(10), @manv int, @ngaylaphd datetime, @ngaygh datetime, @masp tinyint,
+@sl tinyint, @gia money, @mahd1 nvarchar(5)
+as
+begin
+	begin try
+		begin tran
+			insert into [tbl Hoa Don] values (@mahd,@makh,@manv,@ngaylaphd,@ngaygh)
+			insert into [tbl Chi Tiet Hoa Don] values (@mahd1,@masp,@sl,@gia)
+		commit tran
+	end try
+	begin catch
+		print N'Lỗi'
+		rollback tran
+	end catch
+end
 
 --3.
 create procedure pro3 @shd nvarchar(5), @tien money output
@@ -40,27 +65,31 @@ where [tbl Chi Tiet Hoa Don].MaHD=[tbl Hoa Don].MaHD
 group by MONTH(NgayLapHD)
 
 --6.
-create procedure pro6 @ngay nvarchar(50), @shd nvarchar(5) output, @dt money output
+use BT7
+create procedure pro6 @ngay datetime, @shd nvarchar(5) output, @dt money output
 as
 begin
 	select @shd=[tbl Hoa Don].MaHD, @dt=SUM(SoLuong*GiaBan)
 	from [tbl Chi Tiet Hoa Don], [tbl Hoa Don]
-	where [tbl Chi Tiet Hoa Don].MaHD=[tbl Hoa Don].MaHD and NgayLapHD=@ngay	
+	where [tbl Chi Tiet Hoa Don].MaHD=[tbl Hoa Don].MaHD and NgayLapHD=@ngay
+	group by [tbl Hoa Don].MaHD
 end
 
 declare @hd nvarchar(5), @tien money
-exec pro6 N'1997-01-06 00:00:00.000', @hd output, @tien output
-print N'Doanh thu: '+cast(@tien as char)
+exec pro6 N'1997-01-08 00:00:00.000', @hd output, @tien output
+print N'Số hóa đơn: '+@hd+ N' Doanh thu: '+cast(@tien as char)
 
 --7.
-create function func7 (@shd nvarchar(5)) returns table
+use BT7
+alter function func7 (@shd nvarchar(5)) returns table
 as
 return(
-	select MaHD, Sum(SoLuong*GiaBan) as ThanhTien
-	from [tbl Chi Tiet Hoa Don]
-	group by MaHD
+	select [tbl Chi Tiet Hoa Don].*,Sum(SoLuong*GiaBan) as ThanhTien
+	from [tbl Hoa Don],[tbl Chi Tiet Hoa Don]
+	where [tbl Hoa Don].MaHD=@shd and [tbl Hoa Don].MaHD=[tbl Chi Tiet Hoa Don].MaHD
+	group by [tbl Chi Tiet Hoa Don].MaHD, MaSP
 )
-
+select * from func7('10526')
 
 --
 use BT8
@@ -115,3 +144,13 @@ return(
 )
 
 --6.
+--8.
+create function fun8(@ngay datetime) returns table
+as
+return(
+	select *
+	from tNhanVien
+	where MONTH(@ngay)=MONTH(NgayBD) and (YEAR(@ngay)-YEAR(NgayBD))%3=0 and YEAR(@ngay)-YEAR(NgayBD)>0
+)
+
+select * from fun8(N'1995-05-05 00:00:00.000')

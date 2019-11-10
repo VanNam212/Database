@@ -1,9 +1,9 @@
-﻿USE Football;
+﻿USE Football
 --1. View--
 --1.1: Đưa ra bảng điểm của các lớp--
-CREATE VIEW BangDiem(TenLop, SoDiem)
+create VIEW BangDiem
 AS 
-SELECT TenLop, SUM(Diem)
+SELECT TenLop, SUM(Diem) as SoDiem
 FROM Diem, DoiBong
 WHERE Diem.MaLop = DoiBong.MaLop
 GROUP BY TenLop

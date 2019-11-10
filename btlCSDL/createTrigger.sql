@@ -1,6 +1,7 @@
-﻿--Cập nhập điểm
+﻿use Football
+--Cập nhập điểm
 --1.
-ALTER trigger [dbo].[triggerDiem] on [dbo].[Diem]
+create trigger [dbo].[triggerDiem] on [dbo].[Diem]
 for insert, update
 as
 begin
@@ -13,6 +14,7 @@ begin
 	end)
 	update Diem set Diem=@diem where LuotTran=@luottran and MaLop=@malop
 end
+
 --2. Thêm trường trạng thái cho đội bóng, đội bóng nào có trạng thái là "tiếp tục giải" thì tạo thêm trường 
 -- ghi chú là đá tiếp, còn đội nào bỏ giải thì ghi chú sẽ là hủy trận đấu
 alter table DoiBong
@@ -21,12 +23,13 @@ create trigger tg2 on DoiBong
 for insert, update
 as
 begin
-	declare @tt nvarchar(50), @ghichu nvarchar(50)
-	select @tt=TrangThai from inserted
+	declare @tt nvarchar(50), @ghichu nvarchar(50), @malop varchar(50)
+	select @malop=MaLop, @tt=TrangThai from inserted
 	set @ghichu=(case
 		when @tt=N'Tiếp tục' then N'Đá tiếp'
 		else N'Hủy trận'
 	end)
+	update DoiBong set GhiChu=@ghichu where MaLop=@malop
 end
 
 --3. viết 1 trigger xóa tự động các bản ghi liên quan đến đội bóng đã xóa
@@ -42,14 +45,23 @@ begin
 end
 
 --4. viết trigger khi 1 đội bỏ giải thì điểm sẽ được cập nhật cho các đội gặp đội bỏ giải
-create trigger tg4 on DoiBong
+alter trigger tg4 on DoiBong
 for insert, update
 as
 begin
-	update Diem set Diem = '+3', SoBanThang=3, SoBanThua=0 where LuotTran in (select LuotTran from DoiBong_Tran where MaLop in 
-	(select DoiBong.MaLop from DoiBong where TrangThai=N'Bỏ giải')) and 
-	MaLop in (select DoiBong.MaLop from DoiBong where TrangThai=N'Tiếp tục')
-	update Diem set Diem = '0', SoBanThang=0, SoBanThua=-3 where MaLop in (select DoiBong.MaLop from DoiBong where TrangThai=N'Bỏ giải')
+	declare @malop varchar(50), @trangthai nvarchar(50), @luottran nchar(10)
+	select @malop=MaLop, @trangthai=TrangThai
+	from inserted
+	--select @luottran=LuotTran
+	--from Diem
+	--where MaLop=@malop
+	if(@trangthai=N'Bỏ giải')
+	begin
+		--update Diem set Diem=3, SoBanThang=3, SoBanThua=0 where LuotTran=@luottran and MaLop <> @malop
+		--update Diem set Diem = 0, SoBanThang=0, SoBanThua=-3 where LuotTran=@luottran and MaLop=@malop
+		update Diem set Diem = 3, SoBanThang=3, SoBanThua=0 where LuotTran in (select LuotTran from Diem where MaLop =@malop) and MaLop <> @malop
+		update Diem set Diem = 0, SoBanThang=0, SoBanThua=-3 where MaLop = @malop
+	end
 end
 
 --5. viết trigger tự động thông báo lịch thi đấu "đá" hay "hủy" khi có những đội bỏ giải

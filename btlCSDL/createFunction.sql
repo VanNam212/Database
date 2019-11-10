@@ -6,35 +6,36 @@ begin
 	declare @tongbt int
 	select @tongbt=SUM(SoBanThang)
 	from Diem
+	where MaLop=@malop
 	return @tongbt
 end
-select * from tinh_tong('001')
+print dbo.tinh_tong('001')
 
 --2. viết hàm đưa ra danh sách các cầu thủ của 1 đội
 create function danhsach(@malop varchar(50)) returns table
 as
-begin
 	return(select TenCauThu, SoAoCauThu, ViTri, SoBanGhiDuoc, SDT, Email, Que from CauThu where MaLop=@malop)
-end
 select * from danhsach('001')
 
 --3. viết hàm tính tổng số tiền phải thuê của 1 giải đấu
-create function TienThue() returns money
+alter function TienThue() returns money
 as
 begin
-	declare @tongtien money
-	select @tongtien=SUM(TienThueSan)+SUM(TienThueTrongTai)
-	from SanVanDong, TrongTai
+	declare @tongtien money, @ts money, @tt money
+	select @ts=sum(TienThueSan)
+	from SanVanDong
+	select @tt=sum(TienThueTrongTai)
+	from TrongTai
+	set @tongtien=@ts+@tt
 	return @tongtien
 end
-select * from TienThue()
+print dbo.TienThue()
 
 --4. viết hàm tính tổng số tiền tài trợ của mỗi giải đấu
 create function TienTaiTro() returns table
 as
-begin
 	return(select GiaiDau.MaGiaiDau, SUM(SoTienTaiTro) as TongTien
 	from GiaiDau, NhaTaiTro, NhaTaiTro_GiaiDau
 	where GiaiDau.MaGiaiDau=NhaTaiTro_GiaiDau.MaGiaiDau and NhaTaiTro_GiaiDau.MaNhaTaiTro=NhaTaiTro.MaNhaTaiTro
 	group by GiaiDau.MaGiaiDau)
-end
+select * from TienTaiTro()
